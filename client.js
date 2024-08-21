@@ -228,5 +228,5 @@ function SpawnTeams() {
 	while (e.moveNext()) {
 		Spawns.GetContext(e.Current).Spawn();
 	}
-  }
-  
+				 }
+	
