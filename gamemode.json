@@ -6,14 +6,12 @@ var WaitingPlayersTime = 30;
 var BuildBaseTime = 10;
 var GameModeTime = 1;
 var EndOfMatchTime = 1;
-var EndAreaTag = "maxim";
 
 // константы имен
 var WaitingStateValue = "Waiting";
 var BuildModeStateValue = "BuildMode";
 var GameStateValue = "Game";
 var EndOfMatchStateValue = "EndOfMatch";
-var endAreas = AreaService.GetByTag(EndAreaTag);
 
 // посто€нные переменные
 var mainTimer = Timers.GetContext().Get("Main");
