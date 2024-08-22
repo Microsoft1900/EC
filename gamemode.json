@@ -229,3 +229,13 @@ function SpawnTeams() {
 		Spawns.GetContext(e.Current).Spawn();
 	}
 }
+
+
+
+
+
+
+
+
+
+
