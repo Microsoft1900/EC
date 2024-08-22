@@ -2,18 +2,16 @@
 //var System = importNamespace('System');
 
 // константы
-var WaitingPlayersTime = 30;
+var WaitingPlayersTime = 1;
 var BuildBaseTime = 10;
-var GameModeTime = 1;
-var EndOfMatchTime = 1;
-var EndAreaTag = "maxim";
+var GameModeTime = false;
+var EndOfMatchTime = 5;
 
 // константы имен
 var WaitingStateValue = "Waiting";
 var BuildModeStateValue = "BuildMode";
 var GameStateValue = "Game";
 var EndOfMatchStateValue = "EndOfMatch";
-var endAreas = AreaService.GetByTag(EndAreaTag);
 
 // посто€нные переменные
 var mainTimer = Timers.GetContext().Get("Main");
