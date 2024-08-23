@@ -1,5 +1,4 @@
-
-var need = 3; 
+var need = 3;
 var mainTimer = Timers.GetContext().Get("Main"); 
 var stateProp = Properties.GetContext().Get("State"); 
 var defTickTimer = Timers.getContext().Get("DefTimer"); 
