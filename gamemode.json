@@ -1,349 +1,221 @@
-
 //var Color = importNamespace('PixelCombats.ScriptingApi.Structures');
 //var System = importNamespace('System');
 
-// ����������
-var  BuildBaseTime  =  60 ;
-var  GameModeTime  =  1200 ;
-var  EndOfMatchTime  =  10 ;
-вар  InfTimer  =  1 ;  //время бесконечного таймера
-var  myJust  =  0 ;
-вар  myBluePlayers  =  0 ;  //количество людей
-вар  myGameState  =  0 ;  //состояние игры
-вар  myAllPlayers  =  0 ;  //количество всех игроков
-вар  myGameStarted  =  0 ;  //начинаем игру
-var  myBlockGameLoad  =  0 ;
-var  WeaponAreasTag  =  "wp" ;
-var  myRedPlayers  =  0 ;
-var  myRedTeamBlock  =  0 ;
-var  myBluePlayersAlive  =  0 ;
-// �������� ����
-var  WaitingStateValue  =  "Ожидание" ;
-var  BuildModeStateValue  =  "BuildMode" ;
-var  GameStateValue  =  "Игра" ;
-var  EndOfMatchStateValue  =  "EndOfMatch" ;
-var  myCount  =  Игроки.Количество ;
-var  myInventoryBlock  =  0 ;
+// ���������
+var WaitingPlayersTime = 10;
+var BuildBaseTime = 30;
+var GameModeTime = 600;
+var EndOfMatchTime = 10;
+
+// ��������� ����
+var WaitingStateValue = "Waiting";
+var BuildModeStateValue = "BuildMode";
+var GameStateValue = "Game";
+var EndOfMatchStateValue = "EndOfMatch";
 
 // ���������� ����������
-var  mainTimer  =  Timers.GetContext ( ) . Get ( " Main " ) ;
-var  myInfTimer  =  Timers.GetContext ( ) . Get ( " tim1 " ) ;
-var  myWpTimer  =  Таймеры.GetContext ( ) . Get ( " tim2 " ) ;
+var mainTimer = Timers.GetContext().Get("Main");
+var stateProp = Properties.GetContext().Get("State");
 
-var  myTimer3  =  Таймеры.GetContext ( ) . Get ( " tim3 " ) ;
-
-
-
-var  stateProp  =  Свойства.GetContext ( ) . Get ( " Состояние " ) ;
-var  weaponAreas  =  AreaService.GetByTag ( WeaponAreasTag ) ;
-
-// �������� ���������� �������� ������
-Damage.FriendlyFire = GameMode.Parameters.GetBool ( " FriendlyFire " ) ;  
-Карта.Вращение = GameMode.Параметры.GetBool ( " MapRotation " ) ;  
-BreakGraph.OnlyPlayerBlocksDmg = GameMode.Parameters.GetBool ( " PartialDesruction " ) ;  
-BreakGraph.WeakBlocks = GameMode.Parameters.GetBool ( " LoosenBlocks " ) ;  
+// ��������� ��������� �������� �������
+Damage.FriendlyFire = GameMode.Parameters.GetBool("FriendlyFire");
+Map.Rotation = GameMode.Parameters.GetBool("MapRotation");
+BreackGraph.OnlyPlayerBlocksDmg = GameMode.Parameters.GetBool("PartialDesruction");
+BreackGraph.WeakBlocks = GameMode.Parameters.GetBool("LoosenBlocks");
 
 // ���� ������ ������ ������
-BreakGraph.PlayerBlockBoost = true ;  
+BreackGraph.PlayerBlockBoost = true;
 
-// �������� ����
-Свойства . GetContext ( ) . GameModeName . Value  =  "GameModes/Team Dead Match" ;
-TeamsBalancer.IsAutoBalance = false ;  
-Ui.GetContext ( ) . MainTimerId.Value = mainTimer.Id ;  
-// �������� ������
-Команды . Добавить ( "Blue" ,  "ЛЮДИ" ,  {  b : 150  } ) ;
-Команды . Добавить ( "Красный" ,  "ЗОМБИ" ,  {  г : 150  } ) ;
-var  blueTeam  =  Teams.Get ( " Blue " ) ;
-var  redTeam  =  Teams.Get ( " Красные " ) ;
-blueTeam.Spawns.SpawnPointsGroups.Add ( 1 ) ;
-redTeam.Spawns.SpawnPointsGroups.Add ( 2 ) ;
-blueTeam.Build.BlocksSet.Value = BuildBlocksSet.Blue ;  
-redTeam.Build.BlocksSet.Value = BuildBlocksSet.Red ;  
+// ��������� ����
+Properties.GetContext().GameModeName.Value = "GameModes/Team Dead Match";
+TeamsBalancer.IsAutoBalance = true;
+Ui.GetContext().MainTimerId.Value = mainTimer.Id;
+// ������� �������
+Teams.Add("Blue", "Teams/Blue", { b: 1 });
+Teams.Add("Red", "Teams/Red", { r: 1 });
+var blueTeam = Teams.Get("Blue");
+var redTeam = Teams.Get("Red");
+blueTeam.Spawns.SpawnPointsGroups.Add(1);
+redTeam.Spawns.SpawnPointsGroups.Add(2);
+blueTeam.Build.BlocksSet.Value = BuildBlocksSet.Blue;
+redTeam.Build.BlocksSet.Value = BuildBlocksSet.Red;
 
-// ������ ���� ������ ������
-
-// ������ �� �������� � ����������
-LeaderBoard . PlayerLeaderBoardValues  =  [
+// ������ ���� ������� ������
+var maxDeaths = Players.MaxCount * 5;
+Teams.Get("Red").Properties.Get("Deaths").Value = maxDeaths;
+Teams.Get("Blue").Properties.Get("Deaths").Value = maxDeaths;
+// ������ ��� �������� � �����������
+LeaderBoard.PlayerLeaderBoardValues = [
 	{
-		Значение : "Убивает" ,
-		DisplayName : "Статистика/Убийства" ,
-		ShortDisplayName : "Статистика/KillsShort"
-	} ,
+		Value: "Kills",
+		DisplayName: "Statistics/Kills",
+		ShortDisplayName: "Statistics/KillsShort"
+	},
 	{
-		Значение : "Смерти" ,
-		DisplayName : "Статистика/Смерти" ,
-		ShortDisplayName : "Статистика/СмертиКоротко"
-	} ,
+		Value: "Deaths",
+		DisplayName: "Statistics/Deaths",
+		ShortDisplayName: "Statistics/DeathsShort"
+	},
 	{
-		Значение : "Спавн" ,
-		DisplayName : "Статистика/Появления" ,
-		ShortDisplayName : "Статистика/SpawnsShort"
-	} ,
+		Value: "Spawns",
+		DisplayName: "Statistics/Spawns",
+		ShortDisplayName: "Statistics/SpawnsShort"
+	},
 	{
-		Значение : "Очки" ,
-		DisplayName : "Статистика/Оценки" ,
-		ShortDisplayName : "Статистика/РезультатыКраткие"
+		Value: "Scores",
+		DisplayName: "Statistics/Scores",
+		ShortDisplayName: "Statistics/ScoresShort"
 	}
-] ;
-Таблица лидеров . TeamLeaderBoardValue  =  {
-	Значение : "Смерти" ,
-	DisplayName : "Статистика\Смерти" ,
-	ShortDisplayName : "Статистика\Смерти"
-} ;
-// �� ������ � ����������
-LeaderBoard.TeamWeightGetter.Set ( function ( team ) { 
-	return  team.Свойства.Получить ( " Смерти " ) . Значение ;
-} ) ;
-// �� ������ � ����������
-LeaderBoard.PlayersWeightGetter.Set ( function ( player ) { 
-	return  player.Свойства.Получить ( " Убийства " ) . Значение ;
-} ) ;
+];
+LeaderBoard.TeamLeaderBoardValue = {
+	Value: "Deaths",
+	DisplayName: "Statistics\Deaths",
+	ShortDisplayName: "Statistics\Deaths"
+};
+// ��� ������� � ����������
+LeaderBoard.TeamWeightGetter.Set(function(team) {
+	return team.Properties.Get("Deaths").Value;
+});
+// ��� ������ � ����������
+LeaderBoard.PlayersWeightGetter.Set(function(player) {
+	return player.Properties.Get("Kills").Value;
+});
 
-// ������ ���� �������� ������
+// ������ ��� �������� ������
+Ui.GetContext().TeamProp1.Value = { Team: "Blue", Prop: "Deaths" };
+Ui.GetContext().TeamProp2.Value = { Team: "Red", Prop: "Deaths" };
 
-Ui.GetContext ( ) . TeamProp2.Value = { Team : " Red " , Prop : " Kills " } ;     
+// ��������� ���� � ������� �� �������
+Teams.OnRequestJoinTeam.Add(function(player,team){team.Add(player);});
+// ����� �� ����� � �������
+Teams.OnPlayerChangeTeam.Add(function(player){ player.Spawns.Spawn()});
 
+// ������ ������� ����������� ����� ������
+var immortalityTimerName="immortality";
+Spawns.GetContext().OnSpawn.Add(function(player){
+	player.Properties.Immortality.Value=true;
+	timer=player.Timers.Get(immortalityTimerName).Restart(5);
+});
+Timers.OnPlayerTimer.Add(function(timer){
+	if(timer.Id!=immortalityTimerName) return;
+	timer.Player.Properties.Immortality.Value=false;
+});
 
+// ����� ������ ������ ������ �������� ���� ������ � �������
+Properties.OnPlayerProperty.Add(function(context, value) {
+	if (value.Name !== "Deaths") return;
+	if (context.Player.Team == null) return;
+	context.Player.Team.Properties.Get("Deaths").Value--;
+});
+// ���� � ������� ���������� ������� ���������� �� ��������� ����
+Properties.OnTeamProperty.Add(function(context, value) {
+	if (value.Name !== "Deaths") return;
+	if (value.Value <= 0) SetEndOfMatchMode();
+});
 
-var  spawnsView  =  AreaViewService.GetContext ( ) . Get ( " SpawnsView " ) ; spawnsView.Color = { r : 150 , g : 150 , b : 0 } ;      
-spawnsView.Теги = [ ТегОружияОбласти ] ;  
-spawnsView .Включить =  true ; 
-
-var  weaponTrigger  =  AreaPlayerTriggerService . Get ( "WeaponTrigger" ) ;
-weaponTrigger.Tags = [ ТегОружияОбластиТег ] ;  
-weaponTrigger.Enable = true ;  
-weaponTrigger.OnEnter.Add ( function ( player ) {  
-	если  ( игрок.Инвентарь.Ближний бой.Значение )
-  {
-    игрок . Уи . Намекать . Value  =  "ВЫ ЗОМБИ" ;
-  }
-  еще
-  {
-    myWpTimer.Перезапустить ( 180 ) ;
-    weaponTrigger.Enable = false ;  
-    spawnsView .Включить =  false ; 
-    игрок.Инвентарь.Основной.Значение = false ;  
-    игрок.Инвентарь.Основной.Значение = true ;  
-  }
-} ) ;
-
-
-// ���������� ���� � ������� �� �������
-Команды.OnRequestJoinTeam.Add ( функция ( игрок , команда ) {
-
-  если  ( моеСостояниеИгры  ==  1 )
-  {
-    redTeam.Add ( игрок ) ;
-    игрок . Порождает . Порождает ( ) ;
-  }
-  еще
-  {
-    команда . Добавить ( игрок )
-  }
-} ) ;
-// ������ �� ����� � �������
-Команды.OnPlayerChangeTeam.Add ( function ( player ) { player.Spawns.Spawn ( ) } ) ; 
-
-// ������ ������ ���������� ���� ������
-
-// ������ ������ ������ ������ �������� ���� ������ � ������ �
-
-;
-// ���� � ������ ���������� ������ ���������� �� ������ �� ����
-
-
-// �������� ������
-Spawns.OnSpawn.Add ( function ( player ) { 
-	++ игрок . Свойства . Появляется . Значение ;
-  игрок.Инвентарь.Основной.Значение = false ;  
-  если  ( мойИнвентарьБлокирован  ==  1 )
-  {
-    игрок.Инвентарь.Сборка.Значение = false ;  
-  }
-} ) ;
-// �������� ������
-Damage.OnDeath.Add ( function ( player ) { 
-  ++ игрок . Свойства . Смерти . Значение ;
-} ) ;
-// �������� ������
-Damage.OnKill.Add ( function ( player , killing ) {  
-	если  ( убит . Команда  !=  null  &&  убит . Команда  !=  игрок . Команда )  {
-		++ игрок . Свойства . Убийства . Значение ;
-		игрок . Свойства . Очки . Значение  +=  100 ;
+// ������� �������
+Spawns.OnSpawn.Add(function(player) {
+	++player.Properties.Spawns.Value;
+});
+// ������� �������
+Damage.OnDeath.Add(function(player) {
+	++player.Properties.Deaths.Value;
+});
+// ������� �������
+Damage.OnKill.Add(function(player, killed) {
+	if (killed.Team != null && killed.Team != player.Team) {
+		++player.Properties.Kills.Value;
+		player.Properties.Scores.Value += 100;
 	}
-  если  ( моеСостояниеИгры  ==  1 )
-  {
-    redTeam.Add ( убит ) ;
-  }
-} ) ;
+});
 
-//таймеры
-
-myInfTimer.OnTimer.Add ( function ( )
-{
-  myInfTimer.Restart ( InfTimer ) ;
-  myBluePlayersAlive  =
-blueTeam.GetAlivePlayersCount ( ) ;
-  если  ( моеСостояниеИгры  ==  1 )
-  {
-    если  ( myBluePlayersAlive
-==  0 )
-
-    {
-      InfTimer  =  1000 ;
-      myInfTimer.Stop ( ) ;
-      УстановитьКонецМатчаРежим ( ) ;
-    }
-  }
-  если  ( моеСостояниеИгры  !=  1 )
-  {
-    если  ( моеКоличество  >  1 ) 
-    {
-      если  ( stateProp . Value  !=  BuildModeStateValue )
-      {
-        если  ( stateProp . Value  !=  GameStateValue )
-        {
-          УстановитьРежимСборки ( ) ;
-        }
-      }
-    }
-  }
-  если  ( моеСостояниеИгры  ==  1 )
-  {
-    если  ( myRedPlayers  ==  0 )
-    {
-      InfTimer  =  1000 ;
-      myInfTimer.Stop ( ) ;
-      УстановитьКонецМатчаРежим ( ) ;
-    }  
-  }
-
-  myCount  =  Игроки.Количество ;
-  моиRedPlayers
-=  Команды.Получить ( " Красные " ) . Количество ;
-
- моиBluePlayers
-=  Команды.Получить ( " Синие " ) . Количество ;
-
-  если  ( myRedPlayers  >  0 )
-  {
-    myRedTeamBlock  =  1 ;
-  }
-  еще
-  {
-    myRedTeamBlock  =  2 ;
-  }
-} ) ;
-
-myTimer3.OnTimer.Add ( function ( )
-{
-  мойInventoryBlock  =  1 ;
-  моеGameState  =  1 ;
-  myRedTeamBlock  =  1 ;
-} ) ;
-
-
-
-
-// ���������� ������������ ������
-mainTimer.OnTimer.Add ( function ( ) { 
-	переключатель  ( stateProp . Значение )  {
-	случай  WaitingStateValue :
-		УстановитьРежимОжидания ( ) ;
-		перерыв ;
-	случай  BuildModeStateValue :
-		УстановитьРежимИгры ( ) ;
-		перерыв ;
-	случай  GameStateValue :
-		УстановитьКонецМатчаРежим ( ) ;
-		перерыв ;
-	случай  EndOfMatchStateValue :
-		Перезапустить игру ( ) ;
-		перерыв ;
+// ��������� ������������ �������
+mainTimer.OnTimer.Add(function() {
+	switch (stateProp.Value) {
+	case WaitingStateValue:
+		SetBuildMode();
+		break;
+	case BuildModeStateValue:
+		SetGameMode();
+		break;
+	case GameStateValue:
+		SetEndOfMatchMode();
+		break;
+	case EndOfMatchStateValue:
+		RestartGame();
+		break;
 	}
-} ) ;
+});
 
-// ������ ������ ������ ��������
-УстановитьРежимОжидания ( ) ;
+// ������ ������ ������� ���������
+SetWaitingMode();
 
-// �������� ����
-функция  УстановитьРежимОжидания ( )  {
-	stateProp.Value = WaitingStateValue ;  
-	Уи . Получитьконтекст ( ) . Намекать . Value  =  "НУЖНО БОЛЬШЕ ДВУХ ИГРОКОВ" ;
-  myInfTimer.Restart ( InfTimer ) ;
-  weaponTrigger.Enable = false ;  
-  spawnsView .Включить =  false ; 
-  var  inventory  =  Inventory.GetContext ( ) ;
-	inventory.Main.Value = false ;  
-
-  инвентарь . Вторичный . Значение  =  false ;
-	        
-  инвентарь . Ближний бой . Значение  =  false ;
-  Инвентарь . Взрывчатка . Значение  =  false ;
- 	inventory.Build.Value = false ;  
-	Создает .GetContext ( ) .enable = true ;  
-	mainTimer.Restart ( WaitingPlayersTime ) ;
+// ��������� ����
+function SetWaitingMode() {
+	stateProp.Value = WaitingStateValue;
+	Ui.GetContext().Hint.Value = "Hint/WaitingPlayers";
+	Spawns.GetContext().enable = false;
+	mainTimer.Restart(WaitingPlayersTime);
 }
 
-функция  SetBuildMode ( ) 
+function SetBuildMode() 
 {
-	stateProp.Value = BuildModeStateValue ;  
-	Уи . Получитьконтекст ( ) . Намекать . Value  =  "ОЖИДАЙТЕ" ;
-	var  inventory  =  Inventory.GetContext ( ) ;
-	inventory.Main.Value = false ;  
-	инвентарь . Вторичный . Значение  =  false ;
-	инвентарь . Ближний бой . Значение  =  false ;
-	Инвентарь . Взрывчатка . Значение  =  false ;
-	inventory.Build.Value = false ;  
+	stateProp.Value = BuildModeStateValue;
+	Ui.GetContext().Hint.Value = "Hint/BuildBase";
+	var inventory = Inventory.GetContext();
+	inventory.Main.Value = false;
+	inventory.Secondary.Value = false;
+	inventory.Melee.Value = true;
+	inventory.Explosive.Value = false;
+	inventory.Build.Value = true;
 
-	mainTimer.Restart ( BuildBaseTime ) ;
-	Создает .GetContext ( ) .enable = true ;  
-	SpawnTeams ( ) ;
+	mainTimer.Restart(BuildBaseTime);
+	Spawns.GetContext().enable = true;
+	SpawnTeams();
 }
-функция  УстановитьИгровойРежим ( ) 
+function SetGameMode() 
 {
-	stateProp.Value = GameStateValue ;  
-	Уи . Получитьконтекст ( ) . Намекать . Value  =  "РЕЖИМ ОТ justToxiC" ;
-  myTimer3.Перезапустить ( 3 ) ;
+	stateProp.Value = GameStateValue;
+	Ui.GetContext().Hint.Value = "Hint/AttackEnemies";
 
-  weaponTrigger.Enable = true ;  
-  spawnsView .Включить =  true ; 
-	var  inventory  =  Inventory.GetContext ( ) ;
-	если  ( GameMode.Parameters.GetBool ( " OnlyKnives " ) ) { 
-		inventory.Main.Value = false ;  
-		инвентарь . Вторичный . Значение  =  false ;
-		инвентарь . Ближний бой . Значение  =  true ;
-		Инвентарь . Взрывчатка . Значение  =  false ;
-		inventory.Build.Value = true ;  
-	}  еще  {
-	  redTeam.Inventory.Main.Value = false ;  
-    инвентарь . Вторичный . Значение  =  false ;
-	  redTeam.Инвентарь.Ближний бой.Значение = true ;  
-	  Инвентарь . Взрывчатка . Значение  =  false ;
-	  blueTeam.Inventory.Build.Value = true ;  
+	var inventory = Inventory.GetContext();
+	if (GameMode.Parameters.GetBool("OnlyKnives")) {
+		inventory.Main.Value = false;
+		inventory.Secondary.Value = false;
+		inventory.Melee.Value = true;
+		inventory.Explosive.Value = false;
+		inventory.Build.Value = true;
+	} else {
+		inventory.Main.Value = true;
+		inventory.Secondary.Value = true;
+		inventory.Melee.Value = true;
+		inventory.Explosive.Value = true;
+		inventory.Build.Value = true;
 	}
 
-	mainTimer.Restart ( GameModeTime ) ;
-	Порождает.GetContext ( ) . Despawn ( ) ;
-	SpawnTeams ( ) ;
+	mainTimer.Restart(GameModeTime);
+	Spawns.GetContext().Despawn();
+	SpawnTeams();
 }
-функция  SetEndOfMatchMode ( )  {
-	stateProp.Value = EndOfMatchStateValue ;  
-	Ui.GetContext ( ) . Hint.Value = " Hint / EndOfMatch " ;  
+function SetEndOfMatchMode() {
+	stateProp.Value = EndOfMatchStateValue;
+	Ui.GetContext().Hint.Value = "Hint/EndOfMatch";
 
-	var  spawns  =  Spawns.GetContext ( ) ;
-	порождает . enable  =  false ;
-	порождает . Исчезает ( ) ;
-	Игра.GameOver ( LeaderBoard.GetTeams ( ) ) ;
-	mainTimer.Restart ( EndOfMatchTime ) ;
+	var spawns = Spawns.GetContext();
+	spawns.enable = false;
+	spawns.Despawn();
+	Game.GameOver(LeaderBoard.GetTeams());
+	mainTimer.Restart(EndOfMatchTime);
 }
-функция  ПерезапуститьИгру ( )  {
-	Игра.ПерезапуститьИгру ( ) ;
+function RestartGame() {
+	Game.RestartGame();
 }
 
-функция  SpawnTeams ( )  {
-	вар  е  =  Команды . ПолучитьЭнумератор ( ) ;
-	в то время как  ( е . moveNext ( ) )  {
-		Spawns.GetContext ( e.Current ) .Spawn ( ) ;
+function SpawnTeams() {
+	var e = Teams.GetEnumerator();
+	while (e.moveNext()) {
+		Spawns.GetContext(e.Current).Spawn();
+contextedProperties.GetContext().MaxHp.Value = 1; 
+contextedProperties.GetContext().SkinType.Value = 1;
 	}
 }
