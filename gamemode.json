@@ -3,7 +3,6 @@
 //var System = importNamespace('System');
 
 // ����������
-var  WaitingPlayersTime  =  10 ;
 var  BuildBaseTime  =  60 ;
 var  GameModeTime  =  1200 ;
 var  EndOfMatchTime  =  10 ;
