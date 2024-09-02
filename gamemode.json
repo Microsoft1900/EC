@@ -1,73 +1,58 @@
 {
-  "Name": "TDM",
-  "Description": "Team Death Match. Битва двух команд",
-  "StartClientVersion": 573,
-  "MapFilter": {
-    "IsBlank": false,
-    "HasParcourEnd": false
-  },
+  "Name": "МИР",
+  "Description": "Мирный режим",
+  "StartClientVersion": 532,
+  "ApiVersion": 2,
   "MapLists": [
     {
       "MapListId": 324,
       "Name": "Официальные карты"
-    },
-    {
-      "MapListId": 581
     }
   ],
   "Parameters": {
     "Bool": [
       {
-        "Name": "MapRotation",
-        "DisplayName": "GmParams/MapRotation",
-        "Default": true,
-        "Order": 1
+        "Name": "Damage",
+        "DisplayName": "УРОН"
       },
       {
-        "Name": "OnlyKnives",
-        "DisplayName": "GmParams/OnlyKnives",
-        "Order": 2
-      },
-      {
-        "Name": "OnlyPlayerBlocksDmg",
-        "DisplayName": "GmParams/OnlyPlayerBlocksDmg",
-        "Order": 3
+        "Name": "PartialDesruction",
+        "DisplayName": "ЧАСТИЧНОЕ РАЗРУШЕНИЕ"
       },
       {
         "Name": "LoosenBlocks",
-        "DisplayName": "GmParams/LoosenBlocks",
-        "Order": 4
+        "DisplayName": "СЛАБЫЕ БЛОКИ"
       },
       {
-        "Name": "FriendlyFire",
-        "DisplayName": "GmParams/FriendlyFire",
-        "Order": 5
-      }
-    ],
-    "Dropdown": [
+        "Name": "RedTeam",
+        "DisplayName": "КОМАНДА КРАСНАЯ",
+        "Default": true
+      },
       {
-        "Name": "default_game_mode_length",
-        "DisplayName": "GmParams/Length",
-        "Default": "Length_M",
-        "Order": 6,
-        "Variants": [
-          {
-            "Name": "Length_S",
-            "DisplayName": "GmParams/Length_S"
-          },
-          {
-            "Name": "Length_M",
-            "DisplayName": "GmParams/Length_M"
-          },
-          {
-            "Name": "Length_L",
-            "DisplayName": "GmParams/Length_L"
-          },
-          {
-            "Name": "Length_XL",
-            "DisplayName": "GmParams/Length_XL"
-          }
-        ]
+        "Name": "BlueTeam",
+        "DisplayName": "КОМАНДА СИНИЯ",
+        "Default": true
+      },
+      {
+        "Name": "BlueHasNothing",
+        "DisplayName": "ПУСТОЙ ИНВЕНТАРЬ КОМАНДЫ СИНИЕ"
+      },
+      {
+        "Name": "FloodFill",
+        "DisplayName": "ЗАЛИВКА БЛОКОВ"
+      },
+      {
+        "Name": "FillQuad",
+        "DisplayName": "ПОЛНАЯ ЗАЛИВКА БЛОКОВ"
+      },
+      {
+        "Name": "RemoveQuad",
+        "DisplayName": "УДАЛЕНИЕ БЛОКОВ"
+      },
+      {
+        "Name": "Fly",
+        "DisplayName": "ПАЛЁТ",
+        "Default": true
       }
     ]
   }
